@@ -1,0 +1,17 @@
+version: '3'
+services:
+  dispositivo1:
+    image: iot-device
+    environment:
+      - DEVICE_ID=device1
+
+  dispositivo2:
+    image: iot-device
+    environment:
+      - DEVICE_ID=device2
+
+  dispositivo3:
+    image: iot-device
+    environment:
+      - DEVICE_ID=device3
+
