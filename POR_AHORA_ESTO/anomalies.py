@@ -18,7 +18,7 @@ def run_command(command):
     return result.stdout
 
 # Comando que quieres ejecutari
-command = 'cd /home/diego/Desktop/diego/TFG/TFG/FUNCIONA/mqttx; mvn exec:java -Dexec.mainClass="io.broker.gestor_anomalias" | grep -i -A 6 "thingID"'
+command = 'cd /home/diego/Desktop/diego/TFG/TFG/FUNCIONA/mqttx; mvn exec:java -Dexec.mainClass="io.broker.gestor_anomalias" | grep -i "thingID"'
 output = run_command(command)
 output_string = output.strip()
 

@@ -165,6 +165,12 @@ public class gestor_confianza {
             pero sigue en la red.
         */
         // Determinar el estado del dispositivo
+        String a_devolver_estado="";
+        String a_devolver_confianza="";
+        String a_devolver_thingid="";
+        String a_devolver_nivelriesgo="";
+
+
         String estado = null;
         if (estado_actual == 3) {
             estado = "PROHIBIDO";
@@ -195,7 +201,13 @@ public class gestor_confianza {
                 // Recomputar y actualizar la reputación en la BD
                 recomputarYActualizarReputacion(Integer.parseInt(thingID), confianza);
                 actualizarReputacion(Integer.parseInt(thingID), confianza);
-                System.out.println("Confianza y reputación readys");
+                System.out.println("Confianza y reputación - Actualizadas con éxito");
+                
+                a_devolver_estado = estado;
+                a_devolver_confianza += confianza;
+                a_devolver_nivelriesgo += estado_actual;
+                a_devolver_thingid = thingID;
+
             } else {
                 System.out.println("No se encontró el dispositivo con ID " + thingID);
             }
@@ -214,12 +226,20 @@ public class gestor_confianza {
         */
         
 
-        // /*
-        // * Comunicar el estado al resto de dispositivos
-        // */
-        
-        String r = "Ha llegado hasta aquí y el nivel de riesgo es: " + estado_actual + "\n";
-        return r;//estado_actual;
+        /*
+        * Comunicar el estado al resto de dispositivos
+        */
+        // Crear un objeto JSON y agregar los datos
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("nivel_de_riesgo", a_devolver_nivelriesgo);
+        jsonObject.addProperty("confianza", a_devolver_confianza);
+        jsonObject.addProperty("dispositivo_id", a_devolver_thingid);
+        jsonObject.addProperty("estado_actual", a_devolver_estado);
+
+        // Convertir el objeto JSON a string
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(jsonObject);
+        return jsonString;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

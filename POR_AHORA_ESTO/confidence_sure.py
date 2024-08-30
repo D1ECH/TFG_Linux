@@ -36,11 +36,7 @@ def on_message(client, userdata, msg):
         filtered_output = filter_output(output)
         print(f"Output del comando (filtrado):\n{filtered_output}")
 
-        # Obtener la última línea del output filtrado
-        last_line = filtered_output.strip().split('\n')[-36]
-        
-        # Enviar la última línea a Anomalías
-        ack_message = cipher.encrypt(last_line.encode())
+        ack_message = cipher.encrypt("ACK from Confidence".encode())
         client.publish("iot/confianza/to_anomalia", ack_message)
         
         # Enviar el mensaje procesado a la otra cola

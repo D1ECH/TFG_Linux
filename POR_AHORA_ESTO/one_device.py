@@ -27,7 +27,13 @@ def on_message(client, userdata, msg):
 
     if topic == "iot/confianza/to_devices":
         filtered_message = filter_message_by_estado(message)
-        print("\n" + filtered_message)
+        print("\nConfianza:\n" + filtered_message)
+        # Aplicar segundo filtro a la salida del primer grep
+        final_message = apply_second_grep(filtered_message)
+        #print("\nMensaje después del segundo filtro:\n" + final_message)
+        # Enviar el mensaje filtrado a device_2
+        encrypted_message = cipher.encrypt(final_message.encode())
+        client.publish("iot/device_1/to_device_2", encrypted_message)
         message_from_confidence_received.set()
     elif topic == "iot/device_2/to_device_1":
         print("Mensaje recibido de device_2:", message)
@@ -46,6 +52,14 @@ def filter_message_by_estado(message):
     stdout, stderr = process.communicate(input=message)
     if process.returncode != 0:
         return f"Error filtering message: {stderr}"
+    return stdout
+
+def apply_second_grep(message):
+    # Ejecutar segundo grep en un subproceso
+    process = subprocess.Popen(['grep', '-E', 'ID|Estado:'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    stdout, stderr = process.communicate(input=message)
+    if process.returncode != 0:
+        return f"Error applying second grep: {stderr}"
     return stdout
 
 if __name__ == "__main__":
@@ -67,9 +81,9 @@ if __name__ == "__main__":
     message_from_confidence_received.wait()
     
     # Enviar el mensaje recibido a device_2
-    message = "Mensaje de prueba desde device_1"
-    encrypted_message = cipher.encrypt(message.encode())
-    client.publish("iot/device_1/to_device_2", encrypted_message)
+    #message = "Mensaje de prueba desde device_1"
+    #encrypted_message = cipher.encrypt(message.encode())
+    #client.publish("iot/device_1/to_device_2", encrypted_message)
     
     ack_from_device_2_received.wait()
     

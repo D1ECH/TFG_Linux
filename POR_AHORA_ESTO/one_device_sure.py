@@ -15,7 +15,7 @@ def def_handler(sig, frame):
 signal.signal(signal.SIGINT, def_handler)
 
 message_from_confidence_received = threading.Event()
-ack_from_device_1_received = threading.Event()
+ack_from_device_2_received = threading.Event()
 
 def on_log(client, userdata, level, buf):
     print("log: ", buf)
@@ -27,23 +27,17 @@ def on_message(client, userdata, msg):
 
     if topic == "iot/confianza/to_devices":
         filtered_message = filter_message_by_estado(message)
-        print("\nConfianza:\n" + filtered_message)
-        # Aplicar segundo filtro a la salida del primer grep
-        final_message = apply_second_grep(filtered_message)
-        #print("\nMensaje después del segundo filtro:\n" + final_message)
-        # Enviar el mensaje filtrado a device_2
-        encrypted_message = cipher.encrypt(final_message.encode())
-        client.publish("iot/device_2/to_device_1", encrypted_message)
+        print("\n" + filtered_message)
         message_from_confidence_received.set()
-    elif topic == "iot/device_1/to_device_2":
-        print("Mensaje recibido de device_1:", message)
-        ack_message = cipher.encrypt("ACK from device 2".encode())
-        client.publish("iot/device_2/to_device_1", ack_message)
-        ack_from_device_1_received.set()
+    elif topic == "iot/device_2/to_device_1":
+        print("Mensaje recibido de device_2:", message)
+        ack_message = cipher.encrypt("ACK from device 1".encode())
+        client.publish("iot/device_1/to_device_2", ack_message)
+        ack_from_device_2_received.set()
 
 def listen_to_confidence(client):
     client.subscribe("iot/confianza/to_devices")
-    client.subscribe("iot/device_1/to_device_2")
+    client.subscribe("iot/device_2/to_device_1")
     client.loop_start()
 
 def filter_message_by_estado(message):
@@ -54,18 +48,9 @@ def filter_message_by_estado(message):
         return f"Error filtering message: {stderr}"
     return stdout
 
-def apply_second_grep(message):
-    # Ejecutar segundo grep en un subproceso
-    process = subprocess.Popen(['grep', '-E', 'ID|Estado:'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    stdout, stderr = process.communicate(input=message)
-    if process.returncode != 0:
-        return f"Error applying second grep: {stderr}"
-    return stdout
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 1:
-        print("Usage: python second_device.py")
+        print("Usage: python one_device.py")
         sys.exit(1)
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
@@ -81,16 +66,16 @@ if __name__ == "__main__":
 
     message_from_confidence_received.wait()
     
-    # Enviar el mensaje recibido a device_1
-    #message = "Mensaje de prueba desde device_2"
-    #encrypted_message = cipher.encrypt(message.encode())
-    #client.publish("iot/device_2/to_device_1", encrypted_message)
+    # Enviar el mensaje recibido a device_2
+    message = "Mensaje de prueba desde device_1"
+    encrypted_message = cipher.encrypt(message.encode())
+    client.publish("iot/device_1/to_device_2", encrypted_message)
     
-    ack_from_device_1_received.wait()
+    ack_from_device_2_received.wait()
     
-    # Enviar ACK a confidence después de intercambiar mensajes con device_1
-    ack_message = cipher.encrypt("Acknowledged by device 2".encode())
-    client.publish("iot/device_2/to_confianza", ack_message)
+    # Enviar ACK a confidence después de intercambiar mensajes con device_2
+    ack_message = cipher.encrypt("Acknowledged by device 1".encode())
+    client.publish("iot/device_1/to_confianza", ack_message)
 
     client.loop_stop()
     client.disconnect()
