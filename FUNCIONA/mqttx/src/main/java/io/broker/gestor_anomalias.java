@@ -65,9 +65,9 @@ public class gestor_anomalias {
         // Anomalia anomaliaProhibido = new Anomalia(1, 1, 9, 9, 9, "Vulnerabilidad CVE-101", "Dispositivo nuevo que será prohibido");
         // anomaList.add(anomaliaProhibido);
 
-        // Caso 3: Dispositivo nuevo, historial de reputación nulo, quedará en cuarentena
-        Anomalia anomaliaCuarentena = new Anomalia(2, 2, 3, 3, 3, "Vulnerabilidad CVE-102", "Dispositivo nuevo que estará en cuarentena");
-        anomaList.add(anomaliaCuarentena);
+        // // Caso 3: Dispositivo nuevo, historial de reputación nulo, quedará en cuarentena
+        // Anomalia anomaliaCuarentena = new Anomalia(2, 2, 3, 3, 3, "Vulnerabilidad CVE-102", "Dispositivo nuevo que estará en cuarentena");
+        // anomaList.add(anomaliaCuarentena);
 
         // // Caso 4: Dispositivo nuevo, historial de reputación nulo, quedará incluido en la red
         // Anomalia anomaliaIncluido = new Anomalia(3, 3, 1, 1, 1, "Vulnerabilidad CVE-103", "Dispositivo nuevo que será incluido");
@@ -86,16 +86,16 @@ public class gestor_anomalias {
         // anomaList.add(anomaliaHistorialIncluido);
 
         // // Caso 8: Dispositivo con nivel de riesgo alto, quedará prohibido
-        // Anomalia casoEstudio8 = new Anomalia(7, 7, 10, "Vulnerabilidad CVE-107", "Nivel de riesgo muy alto, dispositivo prohibido");
+        // Anomalia casoEstudio8 = new Anomalia(7, 7, 28, "Vulnerabilidad CVE-107", "Nivel de riesgo muy alto, dispositivo prohibido");
         // anomaList.add(casoEstudio8);
 
         // // Caso 9: Dispositivo con nivel de riesgo medio, quedará en cuarentena
-        // Anomalia casoEstudio9 = new Anomalia(8, 8, 5, "Vulnerabilidad CVE-108", "Nivel de riesgo medio, dispositivo en cuarentena");
+        // Anomalia casoEstudio9 = new Anomalia(8, 8, 15, "Vulnerabilidad CVE-108", "Nivel de riesgo medio, dispositivo en cuarentena");
         // anomaList.add(casoEstudio9);
 
-        // // Caso 10: Dispositivo con nivel de riesgo bajo, quedará incluido en la red
-        // Anomalia casoEstudio10 = new Anomalia(9, 9, 1, "Vulnerabilidad CVE-109", "Nivel de riesgo bajo, dispositivo permitido");
-        // anomaList.add(casoEstudio10);
+        // Caso 10: Dispositivo con nivel de riesgo bajo, quedará incluido en la red
+        Anomalia casoEstudio10 = new Anomalia(9, 9, 1, "Vulnerabilidad CVE-109", "Nivel de riesgo bajo, dispositivo permitido");
+        anomaList.add(casoEstudio10);
 
 
         // // TRAZA: Mostrar las anomalías generadas

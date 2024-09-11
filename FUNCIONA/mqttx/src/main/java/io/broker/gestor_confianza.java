@@ -79,6 +79,12 @@ public class gestor_confianza {
                 String probabilidad = jsonObject.get("probabilidad").getAsString();
                 String gravedad = jsonObject.get("gravedad").getAsString();
                 String detectabilidad = jsonObject.get("detectabilidad").getAsString();
+                
+                String nivelRiesgo = jsonObject.get("nivel_riesgo").getAsString();
+                // if(jsonObject.has("nivel_riesgo")){
+                //     String nivelRiesgo = jsonObject.getAsJsonObject("nivel_riesgo").getAsString();
+                    
+                // }
 
                 // Imprimir los valores obtenidos
                 System.out.println(" # ID de Anomalía: " + idAnomalia);
@@ -90,21 +96,21 @@ public class gestor_confianza {
 
                 if (encontrarBD(thingID)) {
                     res = "Dispositivo encontrado";
-                    res = nivel_riesgo(probabilidad, gravedad, detectabilidad, thingID);
+                    res = nivel_riesgo(probabilidad, gravedad, detectabilidad, thingID, nivelRiesgo);
                 }
-            } else if (jsonObject.has("nivelRiesgo")) {
-                String nivelRiesgo = jsonObject.get("nivelRiesgo").getAsString();
+            // } else if (jsonObject.has("nivelRiesgo")) {
+            //     String nivelRiesgo = jsonObject.get("nivelRiesgo").getAsString();
 
-                // Imprimir los valores obtenidos
-                System.out.println(" # ID de Anomalía: " + idAnomalia);
-                System.out.println(" # Amenaza: " + amenaza);
-                System.out.println(" # thingID: " + thingID);
-                System.out.println(" # Nivel de Riesgo: " + nivelRiesgo);
+            //     // Imprimir los valores obtenidos
+            //     System.out.println(" # ID de Anomalía: " + idAnomalia);
+            //     System.out.println(" # Amenaza: " + amenaza);
+            //     System.out.println(" # thingID: " + thingID);
+            //     System.out.println(" # Nivel de Riesgo: " + nivelRiesgo);
 
-                if (encontrarBD(thingID)) {
-                    res = "Dispositivo encontrado";
-                    actualizarEstadoBD(nivelRiesgo, thingID);
-                }
+            //     if (encontrarBD(thingID)) {
+            //         res = "Dispositivo encontrado";
+            //         actualizarEstadoBD(nivelRiesgo, thingID);
+            //     }
             } else {
                 res = "Error: JSON no contiene los campos esperados.";
                 System.out.println(res);
@@ -137,24 +143,45 @@ public class gestor_confianza {
     * En el caso de que el valor del riesgo sea bajo o medio el dispositivo puede unirse o permanecer en la red dependiendo de otros criterios
     */
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public static String nivel_riesgo(String probabilidad, String gravedad, String detectabilidad, String thingID){
+    public static String nivel_riesgo(String probabilidad, String gravedad, String detectabilidad, String thingID, String nivelRiesgo){
         //Almacenamos el estado actual tras haberlo recuperado de la BD;
         int estado_actual=0;
     
+        // Determinar el estado del dispositivo
+        String a_devolver_estado="0";
+        String a_devolver_confianza="";
+        String a_devolver_thingid="";
+        String a_devolver_nivelriesgo="";
+        
         int calculoRiesgo = Integer.parseInt(probabilidad) * Integer.parseInt(gravedad) * Integer.parseInt(detectabilidad);
+        if(Integer.parseInt(nivelRiesgo) > -1){
+            calculoRiesgo = Integer.parseInt(nivelRiesgo);
+        }
         if(calculoRiesgo > 27){
             //El riesgo es alto, el dispositivo debe prohibirse, no podrá ser agregado en la red.
             //Localizar el dispositivo por su ID --> thingID y actualizar su estado a PROHIBIDO
             System.out.println("Estado: PROHIBIDO - Nivel de riesgo: " + calculoRiesgo);
             estado_actual = 3;
+            
+            a_devolver_estado = "PROHIBIDO";
+            a_devolver_thingid = thingID;
+            a_devolver_nivelriesgo+=calculoRiesgo;
         }else if(calculoRiesgo <= 27 && calculoRiesgo >= 9){
             //El riesgo es medio, el dispositivo puede unirse/permanecer en la red siempre y cuando el nivel de CONFIANZA cumple los requisitos mínimos
             System.out.println("Estado: PENDIENTE DE EVALUACIÓN - Nivel de riesgo: " + calculoRiesgo);
             estado_actual = 2;
+
+            a_devolver_estado = "PENDIENTE DE EVALUACIÓN";
+            a_devolver_thingid = thingID;
+            a_devolver_nivelriesgo+=calculoRiesgo;
         }else if(calculoRiesgo < 9){
             //El riesgo es bajo, el dispositivo puede unirse/permanecer en la red siempre y cuando el nivel de CONFIANZA cumple los requisitos mínimos
             System.out.println("Estado: PENDIENTE DE EVALUACIÓN - Nivel de riesgo: " + calculoRiesgo);
             estado_actual = 1;
+
+            a_devolver_estado = "PENDIENTE DE EVALUACIÓN";
+            a_devolver_thingid = thingID;
+            a_devolver_nivelriesgo+=calculoRiesgo;
         }
     
         
@@ -164,11 +191,6 @@ public class gestor_confianza {
             información del dispositivo directamente ni exista en el sistema. Lo cual NO ES LO MISMO que estar en cuarentena, donde no puede comunicarse,
             pero sigue en la red.
         */
-        // Determinar el estado del dispositivo
-        String a_devolver_estado="";
-        String a_devolver_confianza="";
-        String a_devolver_thingid="";
-        String a_devolver_nivelriesgo="";
 
 
         String estado = null;
@@ -185,14 +207,22 @@ public class gestor_confianza {
                 System.out.println("Confianza del dispositivo con ID " + thingID + ": " + confianza);
 
                 // Determinar el estado basado en la confianza calculada
-                if (confianza < 0.3) {
-                    estado = "CUARENTENA";
-                } else if (confianza >= 0.3 && confianza < 0.7) {
-                    estado = "PENDIENTE_EVALUACION";
-                    // Aquí se puede añadir lógica para más comprobaciones si el estado es pendiente de evaluación
-                    // Por ejemplo, se podría realizar una revisión manual o enviar una alerta para una inspección más detallada
-                } else if (confianza >= 0.7) {
+                //  else if (confianza >= 0.3 && confianza < 0.7) {
+                //     estado = "PENDIENTE_EVALUACION";
+                //     // Aquí se puede añadir lógica para más comprobaciones si el estado es pendiente de evaluación
+                //     // Por ejemplo, se podría realizar una revisión manual o enviar una alerta para una inspección más detallada
+                if (confianza >= 0.5) {
                     estado = "ACEPTADO";
+
+                    a_devolver_estado = "ACEPTADO";
+                    a_devolver_thingid = thingID;
+                    a_devolver_confianza+=confianza;
+                } else {
+                    estado = "CUARENTENA";
+
+                    a_devolver_estado = "CUARENTENA";
+                    a_devolver_thingid = thingID;
+                    a_devolver_confianza+=confianza;
                 }
 
                 // Actualizar el estado en la base de datos
@@ -203,14 +233,11 @@ public class gestor_confianza {
                 actualizarReputacion(Integer.parseInt(thingID), confianza);
                 System.out.println("Confianza y reputación - Actualizadas con éxito");
                 
-                a_devolver_estado = estado;
-                a_devolver_confianza += confianza;
-                a_devolver_nivelriesgo += estado_actual;
-                a_devolver_thingid = thingID;
 
             } else {
                 System.out.println("No se encontró el dispositivo con ID " + thingID);
             }
+
         }
         
         
@@ -613,8 +640,8 @@ public class gestor_confianza {
         operatorThings.add(dispositivoProhibido);
 
         // Caso 3: Dispositivo nuevo, historial de reputación nulo, quedará en cuarentena
-        Dispositivo dispositivoCuarentena = new Dispositivo(2, 0, true, LocalDate.of(2022, 1, 1),
-                0, 0, 0, 0, 0, "fisico", "pendiente_evaluacion");
+        Dispositivo dispositivoCuarentena = new Dispositivo(2, 10, false, LocalDate.of(2018, 1, 1),
+                0, 0, 0, 5, 0, "fisico", "pendiente_evaluacion");
         operatorThings.add(dispositivoCuarentena);
 
         // Caso 4: Dispositivo nuevo, historial de reputación nulo, quedará incluido en la red
@@ -628,8 +655,8 @@ public class gestor_confianza {
         operatorThings.add(dispositivoHistorialProhibido);
 
         // Caso 6: Dispositivo con historial, quedará en cuarentena
-        Dispositivo dispositivoHistorialCuarentena = new Dispositivo(5, 5, true, LocalDate.of(2019, 1, 1),
-                200, 3, 30, 2, 50, "virtual", "pendiente_evaluacion");
+        Dispositivo dispositivoHistorialCuarentena = new Dispositivo(5, 7, false, LocalDate.of(2019, 1, 1),
+                200, 3, 30, 8, 50, "virtual", "pendiente_evaluacion");
         operatorThings.add(dispositivoHistorialCuarentena);
 
         // Caso 7: Dispositivo con historial, quedará incluido en la red
@@ -643,7 +670,7 @@ public class gestor_confianza {
         operatorThings.add(dispositivoRiesgoAltoProhibido);
 
         // Caso 9: Dispositivo nuevo, nivel de riesgo medio, quedará en cuarentena
-        Dispositivo dispositivoRiesgoMedioCuarentena = new Dispositivo(8, 0, true, LocalDate.of(2023, 1, 1),
+        Dispositivo dispositivoRiesgoMedioCuarentena = new Dispositivo(8, 5, false, LocalDate.of(2023, 1, 1),
                 0, 0, 0, 0, 0, "fisico", "pendiente_evaluacion");
         operatorThings.add(dispositivoRiesgoMedioCuarentena);
 

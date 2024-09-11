@@ -1,6 +1,6 @@
 package io.broker.Anomalias;
 
-public class Anomalia {
+public class AnomaliaConRiesgo{
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// VARIABLES
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@ public class Anomalia {
 	private int probabilidad;
 	private int gravedad;
 	private int detectabilidad;
-	private int nivel_riesgo = -1;
+	private int nivel_riesgo;
 	private String amenaza;
 	private String descripcion;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19,17 +19,9 @@ public class Anomalia {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTOR
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public Anomalia(final int thingID, final int anomaliaID, final int probabilidad, final int gravedad, final int detectabilidad, final String amenaza, final String descripcion){
-		this.thingID = thingID;
-		this.anomaliaID = anomaliaID;
-		this.probabilidad = probabilidad;
-		this.gravedad = gravedad;
-		this.detectabilidad = detectabilidad;
-		this.amenaza = amenaza;
-		this.descripcion = descripcion;
-	}
+	
 
-	public Anomalia(final int thingID, final int anomaliaID, final int nivel_riesgo, final String amenaza, final String descripcion){
+	public AnomaliaConRiesgo(final int thingID, final int anomaliaID, final int nivel_riesgo, final String amenaza, final String descripcion){
 		this.thingID = thingID;
 		this.anomaliaID = anomaliaID;
 		this.nivel_riesgo = nivel_riesgo;
@@ -137,10 +129,10 @@ public class Anomalia {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Anomalia)) {
+		if (!(obj instanceof AnomaliaConRiesgo)) {
 			return false;
 		}
-		Anomalia other = (Anomalia) obj;
+		AnomaliaConRiesgo other = (AnomaliaConRiesgo) obj;
 		if (thingID != other.anomaliaID) {
 			return false;
 		}
