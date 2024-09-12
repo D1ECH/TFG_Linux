@@ -1,0 +1,10 @@
+{
+  "thingID": 3,
+  "anomaliaID": 3,
+  "probabilidad": 1,
+  "gravedad": 1,
+  "detectabilidad": 1,
+  "amenaza": "Vulnerabilidad CVE-103",
+  "descripcion": "Dispositivo nuevo que será incluido"
+}
+
